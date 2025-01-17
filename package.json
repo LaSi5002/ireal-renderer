@@ -20,7 +20,9 @@
     "html5",
     "es6"
   ],
-  "dependencies": {},
+  "dependencies": {
+    "jsdom": "^26.0.0"
+  },
   "author": "Michael Daumling",
   "license": "MIT",
   "homepage": "https://github.com/daumling/ireal-renderer#readme"

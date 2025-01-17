@@ -268,7 +268,7 @@ class iRealRenderer {
 	 * @param {Object} options - render annots, comments etc in red if hilite property is set
 	 * @returns {undefined}
 	 */
-	render(song, container, options = {}) {
+	render(song, container, options = {}, document) {
 		if (!song.cells)
 			return;
 		var hilite = options.hilite || false;
@@ -288,14 +288,14 @@ class iRealRenderer {
 		for (var i = 0; i < song.cells.length; i++) {
 			var cell = song.cells[i];
 			if (this.cell < 0 || this.cell === 15)
-				this.nextRow(table, cell.spacer);
+				this.nextRow(table, cell.spacer, document);
 			else
 				this.cell++;
 			var html = "";
 			if (cell.annots.length)
-				html += this.annotHtml(cell.annots);
+				html += this.annotHtml(cell.annots, document);
 			if (cell.comments.length)
-				html += this.commentHtml(cell.comments);
+				html += this.commentHtml(cell.comments, document);
 			html += this.cellHtml(cell);
 			var el = this.cells[this.cell];
 			var cls = "";
@@ -377,7 +377,7 @@ class iRealRenderer {
 	 * @param {type} annots
 	 * @returns {undefined}
 	 */
-	annotHtml(annots) {
+	annotHtml(annots, document) {
 		var t = "";
 		for (var i = 0; i < annots.length; i++) {
 			var annot = annots[i];
@@ -414,7 +414,7 @@ class iRealRenderer {
 		return t;
 	}
 	
-	commentHtml(comments) {
+	commentHtml(comments, document) {
 		var cell = this.cells[this.cell];
 		var style = getComputedStyle(cell);
 		var top = parseInt(style.height) + parseInt(style["margin-top"]);
@@ -433,8 +433,8 @@ class iRealRenderer {
 		return html;
 	}
 	
-	nextRow(table, spacer) {
-		this.checkIfNeedsLastBar();
+	nextRow(table, spacer, document) {
+		this.checkIfNeedsLastBar(document);
 		// insert a spacer
 		if (spacer) {
 			var spc = document.createElement("irr-spacer");
@@ -456,7 +456,7 @@ class iRealRenderer {
 	 * needs a closing bar. This is true if there has been an opening
 	 * bar in the last 4 cells.
 	 */
-	checkIfNeedsLastBar() {
+	checkIfNeedsLastBar(document) {
 		if (this.cell !== 15)
 			return;
 		if (!this.closebar)
@@ -563,3 +563,5 @@ class iRealChord {
 		this.alternate = alternate;
 	}
 }
+
+module.exports = iRealRenderer;
