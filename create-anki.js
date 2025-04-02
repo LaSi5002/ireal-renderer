@@ -1,4 +1,4 @@
-console.log("test")
+console.log("Deck")
 
 const fs = require('fs');
 const Playlist = require('./src/ireal-reader-tiny');
@@ -11,8 +11,6 @@ const dom = new JSDOM(`<!DOCTYPE html><body></body>`);
 // Das virtuelle `document`-Objekt nutzen
 const document = dom.window.document;
 
-
-console.log(document.body.innerHTML);
 
 
 var playlist;
@@ -32,19 +30,85 @@ var playlist = new Playlist(playlist_string)
 
 
 
-
-cards = []
-
-for (i = 0; i < 2; i++)
+function indexOfNumber(i)
 {
-    cards.push(createCard(playlist.songs[i]))
+    const firstSongs = [
+        1167,
+        35,
+        894,
+        942,
+        1210,
+        1076,
+        926,
+        1062,
+        414,
+        1266,
+        749,
+        292,
+        194,
+        50,
+        1216,
+        13,
+        300,
+        225,
+        607,
+        776,
+        475,
+        79,
+        1371,
+        230,
+        ]
+
+    if(i < firstSongs.length)
+    {
+        return firstSongs[i]-1
+    }
+    else if (i+1 in firstSongs)
+    {
+        return firstSongs.indexOf(i)
+    }
+    return i
 }
 
 
-upper = '<!DOCTYPE html><html><head><meta charset="UTF-8"><link rel="stylesheet" href="demo.css"><link rel="stylesheet" href="css/ireal-renderer.css">'
-lower = '</head></html>'
-function createCard(song)
+cards = []
+fronts = []
+
+for (i = 0; i < 1410; i++)
 {
+    j = indexOfNumber(i);
+    s = playlist.songs[j];
+    
+    for (t = 0; t < 12; t++)
+    {
+        x = createCard(s, {transpose : t});
+
+        cards.push(x.html);
+
+        
+
+        fronts.push(`<h3>${s.title} (${x.key
+            .replace(/b/g, "\u266d")
+            .replace(/#/g, "\u266f")})</h3><h5>${s.composer}</h5>`)
+    }
+    
+    for (k = 0; k < cards.length; k++)
+    {
+        fronts[k] += "|" + cards[k]
+    }
+
+
+    fs.appendFileSync("deck.txt", fronts.join("\n") + "\n", 'utf-8')
+    cards = []
+    fronts = []
+}
+
+function createCard(song, transpose)
+{
+
+    upper = '<!DOCTYPE html><html><head><meta charset="UTF-8"><link rel="stylesheet" href="demo.css"><link rel="stylesheet" href="css/ireal-renderer.css">'
+    lower = '</head></html>'
+
     const container = document.createElement('div');
     container.id = "chords";
     container.style = "font-size:16pt"  
@@ -52,13 +116,11 @@ function createCard(song)
 
     var r = new iRealRenderer;
     r.parse(song);
-
-    container.innerHTML = `<h3>${song.title} (${song.key
-        .replace(/b/g, "\u266d")
-        .replace(/#/g, "\u266f")})</h3><h5>${song.composer}</h5>`;
+    transposed = r.transpose(song, transpose);
     r.render(song, container, options, document);		
-    returnupper + container.outerHTML + lower;
+    return {html : (upper + container.outerHTML + lower), key: transposed.key};
 }
 
 
-fs.writeFileSync("deck.html", cards.join(";"), 'utf-8')
+
+

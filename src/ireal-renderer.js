@@ -205,9 +205,60 @@ class iRealRenderer {
 			chord.note = song.key.substr(0, song.key.length-1);
 			chord.modifiers = "-";
 		}
+
+        options.transposeSF = this.transposeFlat;
 		options.transpose += song.transpose;
 		this.transposeChord(chord, options);
-		song.key = chord.note + chord.modifiers;
+        
+        if(chord.modifiers == "")
+        {
+            switch(chord.note)
+            {
+                case "D":
+                    options.transposeSF = this.transposeSharp;
+                    break;
+                case "Eb":
+                    break;
+                case "E":
+                    options.transposeSF = this.transposeSharp;
+                    break;
+                case "G":
+                    options.transposeSF = this.transposeSharp;
+                    break;
+                case "A":
+                    options.transposeSF = this.transposeSharp;
+                    break;
+                case "B":
+                    options.transposeSF = this.transposeSharp;
+                    break;
+            }
+        }
+        else
+        {
+            switch(chord.note)
+            {
+                case "Db":
+                    chord.note = "C#"
+                    options.transposeSF = this.transposeSharp;
+                    break;
+                case "E":
+                    options.transposeSF = this.transposeSharp;
+                    break;
+                case "Gb":
+                    chord.note = "F#"
+                    options.transposeSF = this.transposeSharp;
+                    break;
+                case "Ab":
+                    chord.note = "G#"
+                    options.transposeSF = this.transposeSharp;
+                    break;
+                case "B":
+                    options.transposeSF = this.transposeSharp;
+                    break;
+            }
+        }
+        song.key = chord.note + chord.modifiers;
+
 		if (song.cells)
 			song.cells = song.cells.map(el => {
 				if (el.chord)
@@ -226,11 +277,19 @@ class iRealRenderer {
 	 */
 	transposeChord(chord, options) {
 		var arr = this.transposeFlat;
-		var i = arr.indexOf(chord.note);
-		if (i < 0) {
-			arr = this.transposeSharp;
-			i = arr.indexOf(chord.note);
+		var flatIndex = arr.indexOf(chord.note);
+        var i = flatIndex;
+        arr = this.transposeSharp;
+        
+        var sharpIndex = arr.indexOf(chord.note);
+		if (flatIndex < 0) {
+            i = sharpIndex;
 		}
+
+        arr = options.transposeSF
+
+
+
 		if (i >= 0) {
 			i += (options.transpose % 12);
 			if (i < 0)
@@ -367,6 +426,10 @@ class iRealRenderer {
 			case 'b': sup = "<sup>\u266d</sup>"; note = note[0]; break;
 			case '#': sup = "<sup>\u266f</sup>"; note = note[0]; break;
 		}
+        if(note.length == 1)
+        {
+            note = `<div class="chord-note">${note}</div>`
+        }
 		if (modifiers)
 			modifiers = `<sub>${modifiers.replace("^", "\u25B3").replace("h", "\u00D8")}</sub>`;
 		return `${note}${sup}${modifiers}`;
@@ -416,8 +479,8 @@ class iRealRenderer {
 	
 	commentHtml(comments, document) {
 		var cell = this.cells[this.cell];
-		var style = getComputedStyle(cell);
-		var top = parseInt(style.height) + parseInt(style["margin-top"]);
+		//var style = getComputedStyle(cell);
+		var top = parseInt(16) + parseInt(1);
 		var html = "";
 		for (var i = 0; i < comments.length; i++) {
 			var c = comments[i];
